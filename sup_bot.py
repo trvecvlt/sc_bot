@@ -12,11 +12,11 @@ SHOP_DIR = "shop/"
 CART_DIR = "cart/"
 ALL_DIR = "all/"
 
-'''
-DEPARTMENT = "t-shirts"
-ITEM = "Kiss Tee"
-COLOR = "Lime"
-ITEM_SIZE = 'Medium'
+
+DEPARTMENT = "pants"
+ITEM = "Washed Regular Jeans"
+COLOR = "Dusty Rose"
+ITEM_SIZE = '30'
 ORDER_MAIL = 'test@example.com'
 FIRST_NAME = 'test'
 LAST_NAME = 'test'
@@ -35,14 +35,13 @@ CREDIT_CARD_LAST_NAME = 'test'
 CREDIT_CARD_MONTH = '1'
 CREDIT_CARD_YEAR = '2015'
 CREDIT_CARD_CVV2 = '243'
-'''
-class SupBot:
 
-    from datetime import datetime, time
-    from time import sleep
+class SupBot:
 
 
     def wait_start(self, runTime):
+        from datetime import datetime, time
+        from time import sleep
         startTime = time(*(map(int, runTime.split(':'))))
         while startTime > datetime.today().time(): # you can add here any additional variable to break loop if necessary
             sleep(1)# you can change 1 sec interval to any other
@@ -86,7 +85,7 @@ class SupBot:
 
 
 
-        #self.wait_start('15:40:20')
+        #self.wait_start('22:04:40')
 
         s = requests.session()
 
