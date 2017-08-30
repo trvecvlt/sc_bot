@@ -80,7 +80,7 @@ class SupBot:
 
         from selenium import webdriver
         from selenium.webdriver.support.ui import Select
-        driver = webdriver.Firefox(executable_path="geckodriver")
+        driver = webdriver.Chrome(executable_path="chromedriver.exe")
         driver.get("https://www.supremenewyork.com")
 
         try:
@@ -90,7 +90,7 @@ class SupBot:
 
         s = requests.session()
 
-        s.headers.update({'User-Agent': 'Mozilla/5.0'})
+        s.headers.update({'User-Agent': 'Chrome/60.0.3112.113'})
 
         s.cookies.clear()
 
