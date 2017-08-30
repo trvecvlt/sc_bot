@@ -12,29 +12,29 @@ SHOP_DIR = "shop/"
 CART_DIR = "cart/"
 ALL_DIR = "all/"
 
+import ConfigParser
 
-DEPARTMENT = "pants"
-ITEM = "Washed Regular Jeans"
-COLOR = "Dusty Rose"
-ITEM_SIZE = '30'
-ORDER_MAIL = 'test@example.com'
-FIRST_NAME = 'test'
-LAST_NAME = 'test'
-COMPANY_NAME = 'test'
-ADDRESS_1 = 'test 123'
-ADDRESS_2 = ''
-CITY_NANE = 'Agoura'
-ZIP = '91376'
-COUNTRY = 'United States'
-PROVINCE = 'California'
-PHONE = '32532456'
-CART_LINK = 'http://shop.kithnyc.com/cart'
-CREDIT_CARD_NUM = '4272123345674941'
-CREDIT_CARD_FIRST_NAME = 'test'
-CREDIT_CARD_LAST_NAME = 'test'
-CREDIT_CARD_MONTH = '1'
-CREDIT_CARD_YEAR = '2015'
-CREDIT_CARD_CVV2 = '243'
+config = ConfigParser.RawConfigParser()
+config.read('config.cfg')
+
+DEPARTMENT = config.get('Item', 'Department')
+ITEM = config.get('Item', 'Item')
+COLOR = config.get('Item', 'Color')
+ITEM_SIZE = config.get('Item', 'Size')
+
+FULL_NAME = config.get('Buyer', 'Name')
+ORDER_MAIL = config.get('Buyer', 'Mail')
+PHONE = config.get('Buyer', 'Phone')
+ADDRESS = config.get('Buyer', 'Address')
+CITY = config.get('Buyer', 'City')
+COUNTRY = config.get('Buyer', 'Country')
+ZIP = config.get('Buyer', 'Zip')
+ORDER_MAIL = config.get('Buyer', 'Mail')
+CARD_TYPE = config.get('Buyer', 'CardType')
+CREDIT_CARD_NUM = config.get('Buyer', 'CardNum')
+CREDIT_CARD_MONTH = config.get('Buyer', 'Month')
+CREDIT_CARD_YEAR = config.get('Buyer', 'Year')
+CREDIT_CARD_CVV2 = config.get('Buyer', 'CVV')
 
 class SupBot:
 
@@ -69,7 +69,7 @@ class SupBot:
 
         return {'style':style_id,'size':size_elem['value'], 'link':link}
 
-    def checkout(self, item_name):
+    def checkout(self):
 
         http_proxy  = "http://46.101.72.191:8118"
 
@@ -80,12 +80,13 @@ class SupBot:
 
         from selenium import webdriver
         from selenium.webdriver.support.ui import Select
-        driver = webdriver.Firefox()
+        driver = webdriver.Firefox(executable_path="geckodriver")
         driver.get("https://www.supremenewyork.com")
 
-
-
-        #self.wait_start('22:04:40')
+        try:
+            self.wait_start(config.get('Item', 'start'))
+        except ConfigParser.NoOptionError:
+            pass
 
         s = requests.session()
 
@@ -111,34 +112,34 @@ class SupBot:
 
         driver.get("https://www.supremenewyork.com/checkout")
         field = driver.find_element_by_id("order_billing_name")
-        field.send_keys("Marvin Himaer")
+        field.send_keys(FULL_NAME)
         field = driver.find_element_by_id("order_email")
-        field.send_keys("marvinhimaer@rambler.ru")
+        field.send_keys(ORDER_MAIL)
         field = driver.find_element_by_id("order_tel")
-        field.send_keys("89005553535")
+        field.send_keys(PHONE)
         field = driver.find_element_by_id("bo")
-        field.send_keys("lenina 1")
+        field.send_keys(ADDRESS)
         field = driver.find_element_by_id("order_billing_city")
-        field.send_keys("Dryutsk")
+        field.send_keys(CITY)
         field = Select(driver.find_element_by_id("order_billing_country"))
-        field.select_by_visible_text("RUSSIA")
+        field.select_by_visible_text(COUNTRY)
         field = driver.find_element_by_id("order_billing_zip")
-        field.send_keys("214001")
+        field.send_keys(ZIP)
         field = Select(driver.find_element_by_id("credit_card_type"))
-        field.select_by_visible_text("Mastercard")
+        field.select_by_visible_text(CARD_TYPE)
         field = driver.find_element_by_id("cnb")
-        field.send_keys("5105105105105100")
+        field.send_keys(CREDIT_CARD_NUM)
         field = Select(driver.find_element_by_id("credit_card_month"))
-        field.select_by_visible_text("01")
+        field.select_by_visible_text(CREDIT_CARD_MONTH)
         field = Select(driver.find_element_by_id("credit_card_year"))
-        field.select_by_visible_text("2020")
+        field.select_by_visible_text(CREDIT_CARD_YEAR)
         field = driver.find_element_by_id("vval")
-        field.send_keys("666")
+        field.send_keys(CREDIT_CARD_CVV2)
         field = driver.find_element_by_id("order_terms")
         field.click()
         return
 
+
 bot = SupBot()
 
-
-bot.checkout("qwe")
+bot.checkout()
