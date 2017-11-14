@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import webbrowser
 import timing
+from fuzzywuzzy import fuzz
 
 #TODO: move to interface
 
@@ -17,10 +18,12 @@ import ConfigParser
 config = ConfigParser.RawConfigParser()
 config.read('config.cfg')
 
-DEPARTMENT = config.get('Item', 'Department')
-ITEM = config.get('Item', 'Item')
-COLOR = config.get('Item', 'Color')
-ITEM_SIZE = config.get('Item', 'Size')
+DEPARTMENT = config.get('Item', 'Department').lower()
+ITEM = config.get('Item', 'Item').lower()
+COLOR = config.get('Item', 'Color').lower()
+ITEM_SIZE = config.get('Item', 'Size').lower()
+
+MATCH_RATE = 75
 
 FULL_NAME = config.get('Buyer', 'Name')
 ORDER_MAIL = config.get('Buyer', 'Mail')
@@ -52,7 +55,7 @@ class SupBot:
         div = parsed_page.body.find('div', id="wrap")
         div = div.find('div', id='container')
         for item in div.findAll('article'):
-            if item.div.h1.a.find(text=ITEM) and item.div.p.a.find(text=COLOR):
+            if fuzz.partial_ratio(ITEM, item.div.h1.a.text.lower()) > MATCH_RATE and item.div.p.a.find(text=COLOR):
                 return item.div.a['href']
         return None
 
@@ -136,7 +139,11 @@ class SupBot:
         field = driver.find_element_by_id("vval")
         field.send_keys(CREDIT_CARD_CVV2)
         field = driver.find_element_by_id("order_terms")
-        field.click()
+        field.send_keys(webdriver.common.keys.Keys.SPACE)
+
+        import msvcrt as m
+        m.getch()
+
         return
 
 
