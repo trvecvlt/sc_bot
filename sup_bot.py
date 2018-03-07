@@ -18,10 +18,14 @@ import ConfigParser
 config = ConfigParser.RawConfigParser()
 config.read('config.cfg')
 
+
+def get_or_default(section, option, default):
+    return config.has_option(section, option) and config.get(section, option) or default
+
 DEPARTMENT = config.get('Item', 'Department').lower()
 ITEM = config.get('Item', 'Item').lower()
-COLOR = config.get('Item', 'Color').lower()
-ITEM_SIZE = config.get('Item', 'Size').lower()
+COLOR = get_or_default('Item', 'Color', 'any').lower()
+ITEM_SIZE = get_or_default('Item', 'Size', 'any').lower()
 
 MATCH_RATE = 75
 
@@ -41,7 +45,6 @@ CREDIT_CARD_CVV2 = config.get('Buyer', 'CVV')
 
 class SupBot:
 
-
     def wait_start(self, runTime):
         from datetime import datetime, time
         from time import sleep
@@ -55,8 +58,14 @@ class SupBot:
         div = parsed_page.body.find('div', id="wrap")
         div = div.find('div', id='container')
         for item in div.findAll('article'):
-            if fuzz.partial_ratio(ITEM, item.div.h1.a.text.lower()) > MATCH_RATE and item.div.p.a.find(text=COLOR):
-                return item.div.a['href']
+            curr_name = (item.div.h1.a.text.lower().encode('ascii',errors='ignore').decode())
+            curr_color = (item.div.p.a.text.lower().encode('ascii',errors='ignore').decode())
+            if COLOR == 'any':
+                if fuzz.partial_ratio(ITEM, curr_name) > MATCH_RATE:
+                    return item.div.a['href']
+            else:
+                if fuzz.partial_ratio(ITEM, curr_name) > MATCH_RATE and curr_color==COLOR:
+                    return item.div.a['href']
         return None
 
     def _get_item_id(self, item_page_html):
@@ -68,7 +77,14 @@ class SupBot:
         fieldset = div.div.form.find('fieldset', class_=None)
         link = div.div.form['action']
         select = fieldset.find('select')
-        size_elem = select.find('option', text=ITEM_SIZE)
+        if DEPARTMENT=='accessories':
+            size_elem = fieldset.input
+        elif ITEM_SIZE=='any':
+            size_elem = select.option
+        else:
+            size_elem = select.find(lambda tag: tag.name.lower() == 'option',
+                text=lambda x: x and x.lower() == ITEM_SIZE)
+
 
         return {'style':style_id,'size':size_elem['value'], 'link':link}
 
